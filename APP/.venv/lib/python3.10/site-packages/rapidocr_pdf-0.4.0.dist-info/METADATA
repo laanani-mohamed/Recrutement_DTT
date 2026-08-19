@@ -1,0 +1,28 @@
+Metadata-Version: 2.1
+Name: rapidocr-pdf
+Version: 0.4.0
+Summary: Tools of extracting PDF content based on RapidOCR
+Home-page: https://github.com/RapidAI/RapidOCRPDF
+Author: SWHL
+Author-email: liekkaskono@163.com
+License: Apache-2.0
+Keywords: rapidocr_pdf,rapidocr_onnxruntime,ocr,onnxruntime,openvino
+Platform: Any
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: filetype>=1.2.0
+Requires-Dist: pymupdf
+Requires-Dist: rapidocr>=2.0.7
+Requires-Dist: colorlog
+Requires-Dist: onnxruntime
+
+See [link](https://github.com/RapidAI/RapidOCRPDF) for details.

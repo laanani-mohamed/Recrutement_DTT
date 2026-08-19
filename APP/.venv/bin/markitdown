@@ -1,0 +1,8 @@
+#!/bin/sh
+'''exec' "/Users/mac/Desktop/DataTeam/AI Project/2-Recrutement/APP/.venv/bin/python3" "$0" "$@"
+' '''
+import sys
+from markitdown.__main__ import main
+if __name__ == '__main__':
+    sys.argv[0] = sys.argv[0].removesuffix('.exe')
+    sys.exit(main())

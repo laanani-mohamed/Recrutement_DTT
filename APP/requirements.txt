@@ -1,0 +1,26 @@
+# ============================================================
+# REQUIREMENTS - Projet d'Extraction et Classification de CV
+# ============================================================
+# Chaque dépendance est commentée pour indiquer
+# à quelle méthode d'extraction elle est associée.
+# ============================================================
+
+# ---- Interface Web (Debug & Dashboard) ---------------------
+streamlit>=1.35.0        # Interface web Streamlit pour le fichier debug.py
+
+# ---- PDF utilitaire général --------------------------------
+pypdfium2>=4.30.0        # Lecture de pages PDF (nombre de pages) - utilisé par llmwhisperer_ocr.py
+
+# ---- Méthode 1 : LLMWhisperer (OCR cloud via API) ----------
+llmwhisperer-client>=2.0.0   # Client API LLMWhisperer (Unstract) - llmwhisperer_ocr.py
+
+# ---- Méthode 2 : RapidOCR (OCR local ONNX) ----------------
+rapidocr>=1.3.0              # Moteur OCR local rapide basé sur ONNX - rapid_ocr.py
+onnxruntime>=1.18.0          # Runtime ONNX nécessaire pour RapidOCR - rapid_ocr.py
+rapidocr_pdf>=0.1.0          # Extension RapidOCR pour lire directement les PDF - rapid_ocr.py
+Pillow>=10.0.0               # Traitement d'images (requis par RapidOCR) - rapid_ocr.py
+pymupdf>=1.24.0              # Lecture et rendu PDF en images (requis par rapidocr_pdf) - rapid_ocr.py
+
+# ---- Méthode 3 : MarkItDown (conversion PDF → Markdown) ----
+markitdown[pdf]>=0.1.0       # Convertit PDF en texte Markdown sans IA - markitdown_ocr.py
+pdfplumber>=0.11.0           # Backend PDF utilisé par MarkItDown pour l'extraction de texte - markitdown_ocr.py

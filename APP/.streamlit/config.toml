@@ -1,0 +1,8 @@
+[theme]
+base = "light"
+
+primaryColor        = "#e84f34ff"       # Bleu accent pour boutons et éléments actifs
+backgroundColor     = "#ffffff"       # Fond principal blanc
+secondaryBackgroundColor = "#f1f5f9"  # Fond secondaire (sidebar, cards) gris très clair
+textColor           = "#0f172a"       # Texte principal noir/bleu foncé
+font                = "sans-serif"
