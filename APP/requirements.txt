@@ -24,3 +24,17 @@ pymupdf>=1.24.0              # Lecture et rendu PDF en images (requis par rapido
 # ---- Méthode 3 : MarkItDown (conversion PDF → Markdown) ----
 markitdown[pdf]>=0.1.0       # Convertit PDF en texte Markdown sans IA - markitdown_ocr.py
 pdfplumber>=0.11.0           # Backend PDF utilisé par MarkItDown pour l'extraction de texte - markitdown_ocr.py
+
+# ============================================================
+# PROVIDERS LLM — Classification / Extraction JSON des CVs
+# ============================================================
+
+# ---- Provider 1 : Groq (llama-3.3-70b) ---------------------
+groq>=0.9.0                  # SDK Groq officiel - groq_provider.py (ultra rapide, 6k req/jour gratuit)
+
+# ---- Provider 2 : Google Gemini ----------------------------
+google-genai>=2.0.0          # SDK officiel Google Gemini (nouveau) - gemini_provider.py (1.5k req/jour gratuit)
+
+# ---- Provider 3 : OpenRouter (compatible OpenAI) -----------
+openai>=1.30.0               # SDK OpenAI utilisé comme client OpenRouter - openrouter_provider.py
+
