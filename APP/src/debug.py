@@ -60,6 +60,7 @@ st.markdown(
         --accent-purple:#7c3aed;
         --accent-green: #059669;
         --accent-amber: #d97706;
+        --accent-rose:  #db2777;
         --text-primary: #0f172a;
         --text-muted:   #64748b;
         --border:       #e2e8f0;
@@ -117,6 +118,7 @@ st.markdown(
     .bg-green  { background: var(--accent-green); }
     .bg-purple { background: var(--accent-purple); }
     .bg-amber  { background: var(--accent-amber); }
+    .bg-rose   { background: var(--accent-rose); }
 
     /* ---- Metric cards ---- */
     .metric-row { display: flex; gap: 0.75rem; margin: 0.75rem 0; flex-wrap: wrap; }
@@ -229,7 +231,7 @@ st.markdown(
     """
     <div class="hero-header">
         <h1>📋 CV Pipeline</h1>
-        <p>Upload → Extraction → JSON → Scoring</p>
+        <p>Upload → Extraction → JSON → Scoring → Entretien</p>
     </div>
     """,
     unsafe_allow_html=True,
@@ -567,7 +569,7 @@ st.markdown("---")
 
 
 # ==================================================================
-#  SECTION 4 — SCORING (À VENIR)
+#  SECTION 4 — SCORING (verdict par exigence, score calculé en Python)
 # ==================================================================
 section_header(4, "🎯", "Scoring — Matching CV / Poste", "amber")
 
@@ -612,7 +614,8 @@ else:
             )
 
             info_prov_score = SCORING_PROVIDERS[provider_choisi_score]
-            
+            st.caption(info_prov_score["description"])
+
             if provider_choisi_score == "ollama":
                 api_key_score = st.text_input(
                     "🦙 Modèle Ollama (Scoring)",
@@ -625,7 +628,6 @@ else:
                     f"🗝️ Clé API — {info_prov_score['env_key']}",
                     type="password",
                     placeholder=f"Collez votre {info_prov_score['env_key']} ici...",
-                    help="Optionnel si la clé est déjà intégrée dans le code.",
                     key="api_key_score",
                 )
 
@@ -640,112 +642,366 @@ else:
 
         with col_score_res:
             if lancer_scoring and job_desc.strip():
-                with st.spinner(f"🎯 Évaluation avec **{SCORING_PROVIDERS[provider_choisi_score]['label']}**..."):
-                    debut_score = time.perf_counter()
-                    try:
-                        cle_score = api_key_score.strip() if api_key_score else None
-                        
-                        result_score = score_cv(
-                            result_json_dispo,
-                            job_desc.strip(),
-                            provider=provider_choisi_score,
-                            api_key=cle_score if cle_score else None,
-                        )
-                        duree_score = time.perf_counter() - debut_score
-                        
-                        st.session_state["result_score"] = result_score
-                        st.success(f"✅ Scoring terminé en {duree_score:.1f}s")
-                        
-                        # Affichage du score global
-                        score_global = result_score.get("score_global", 0)
-                        
-                        # Choix de la couleur selon le score
-                        if score_global >= 80:
-                            color_score = "green"
-                        elif score_global >= 50:
-                            color_score = "amber"
-                        else:
-                            color_score = "red"
-                            
-                        st.markdown(
-                            f'''<div style="text-align: center; margin-bottom: 1.5rem;">
-                                <div style="font-size: 3.5rem; font-weight: 800; color: var(--accent-{color_score});">{score_global}%</div>
-                                <div style="font-size: 1rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;">Score global d'adéquation</div>
-                            </div>''',
-                            unsafe_allow_html=True
-                        )
-                        
-                        # Détails des scores
-                        s_comp = result_score.get("score_competences", 0)
-                        s_exp = result_score.get("score_experience", 0)
-                        s_form = result_score.get("score_formation", 0)
-                        
-                        st.markdown(
-                            f"""<div class="metric-row">
-                                <div class="metric-item"><div class="metric-value" style="font-size: 1.1rem;">{s_comp}%</div><div class="metric-label">Compétences</div></div>
-                                <div class="metric-item"><div class="metric-value" style="font-size: 1.1rem;">{s_exp}%</div><div class="metric-label">Expérience</div></div>
-                                <div class="metric-item"><div class="metric-value" style="font-size: 1.1rem;">{s_form}%</div><div class="metric-label">Formation</div></div>
-                            </div>""",
-                            unsafe_allow_html=True,
-                        )
-                        
-                        # Affichage des explications si elles existent
-                        has_expl = any(k in result_score for k in ["explication_competences", "explication_experience", "explication_formation"])
-                        if has_expl:
-                            with st.expander("📊 Explications détaillées des scores", expanded=True):
-                                if "explication_competences" in result_score:
-                                    st.markdown(f"**Compétences ({s_comp}%) :** {result_score['explication_competences']}")
-                                if "explication_experience" in result_score:
-                                    st.markdown(f"**Expérience ({s_exp}%) :** {result_score['explication_experience']}")
-                                if "explication_formation" in result_score:
-                                    st.markdown(f"**Formation ({s_form}%) :** {result_score['explication_formation']}")
-                                    
-                        # Recommandation
-                        reco = result_score.get("recommandation", "")
-                        if reco:
-                            st.markdown(
-                                f"""<div style="background:#fefce8;border-left:3px solid #ca8a04;
-                                border-radius:0 8px 8px 0;padding:0.7rem 1rem;margin:1rem 0;
-                                font-size:0.9rem;color:#854d0e;"><strong>💡 Évaluation :</strong> {reco}</div>""",
-                                unsafe_allow_html=True,
-                            )
-                            
-                        # Points forts et lacunes
-                        col_pf, col_lac = st.columns(2)
-                        with col_pf:
-                            st.markdown("#### ✅ Points forts")
-                            pf_list = result_score.get("points_forts", [])
-                            for pf in pf_list:
-                                st.markdown(f"- {pf}")
-                                
-                        with col_lac:
-                            st.markdown("#### ⚠️ Lacunes")
-                            lac_list = result_score.get("lacunes", [])
-                            for lac in lac_list:
-                                st.markdown(f"- {lac}")
+                barre_score = st.progress(0.0, text="Démarrage…")
 
-                        # JSON complet
-                        import json as _json
-                        score_json_str = _json.dumps(result_score, ensure_ascii=False, indent=2)
-                        with st.expander("📋 JSON détaillé", expanded=False):
-                            st.code(score_json_str, language="json")
-                            
-                    except Exception as e:
-                        st.error(f"❌ Erreur lors du scoring :\n\n```\n{traceback.format_exc()}\n```")
-                        
-            elif "result_score" in st.session_state:
-                # Afficher le résultat précédent
-                rs = st.session_state["result_score"]
-                st.info(f"🎯 Score déjà calculé : **{rs.get('score_global', 0)}%**")
-                
-                score_json_str = json.dumps(rs, ensure_ascii=False, indent=2)
-                with st.expander("📋 Afficher les détails de l'évaluation", expanded=True):
-                    st.code(score_json_str, language="json")
-            else:
+                def _sur_progression_score(etape: str, fraction: float):
+                    barre_score.progress(min(max(fraction, 0.0), 1.0), text=etape)
+
+                debut_score = time.perf_counter()
+                try:
+                    cle_score = api_key_score.strip() if api_key_score else None
+                    est_ollama_score = provider_choisi_score == "ollama"
+
+                    result_score = score_cv(
+                        result_json_dispo,
+                        job_desc.strip(),
+                        provider=provider_choisi_score,
+                        api_key=None if est_ollama_score else (cle_score or None),
+                        model=cle_score if est_ollama_score else None,
+                        on_progress=_sur_progression_score,
+                    )
+                    st.session_state["result_score"] = result_score
+                    barre_score.empty()
+                    st.success(
+                        f"✅ Scoring terminé en {time.perf_counter() - debut_score:.1f}s "
+                        f"({len(result_score.verdicts)} exigences évaluées)"
+                    )
+                except ValueError as e:
+                    barre_score.empty()
+                    st.error(f"❌ Clé API manquante :\n\n{e}")
+                except Exception:
+                    barre_score.empty()
+                    st.error(f"❌ Erreur lors du scoring :\n\n```\n{traceback.format_exc()}\n```")
+
+            carte_score = st.session_state.get("result_score", None)
+
+            if carte_score is None:
                 if not job_desc.strip():
                     empty_state("📝", "Veuillez coller une description de poste à gauche.")
                 else:
                     empty_state("🎯", "Cliquez sur Évaluer le profil pour lancer le matching.")
+            else:
+                if not lancer_scoring:
+                    st.info(f"🎯 Score en mémoire — **{carte_score.candidat}** · *{carte_score.poste}*")
+
+                score_global = carte_score.score_global
+                color_score = "green" if score_global >= 70 else "amber" if score_global >= 40 else "rose"
+
+                st.markdown(
+                    f'''<div style="text-align: center; margin-bottom: 1rem;">
+                        <div style="font-size: 3.5rem; font-weight: 800; color: var(--accent-{color_score});">{score_global}%</div>
+                        <div style="font-size: 1rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;">Score global d'adéquation</div>
+                    </div>''',
+                    unsafe_allow_html=True
+                )
+
+                nb_verdicts = len(carte_score.verdicts)
+                nb_satisfait = sum(1 for v in carte_score.verdicts if v.status == "satisfait")
+                nb_verifiees = sum(1 for v in carte_score.verdicts if v.evidence_verifiee)
+                st.markdown(
+                    f"""<div class="metric-row">
+                        <div class="metric-item"><div class="metric-value">{nb_satisfait}/{nb_verdicts}</div><div class="metric-label">Exigences satisfaites</div></div>
+                        <div class="metric-item"><div class="metric-value">{len(carte_score.job.must_have)}</div><div class="metric-label">Indispensables</div></div>
+                        <div class="metric-item"><div class="metric-value">{nb_verifiees}/{nb_verdicts}</div><div class="metric-label">Preuves vérifiées</div></div>
+                    </div>""",
+                    unsafe_allow_html=True,
+                )
+
+                if carte_score.recommandation:
+                    st.markdown(
+                        f"""<div style="background:#fefce8;border-left:3px solid #ca8a04;
+                        border-radius:0 8px 8px 0;padding:0.7rem 1rem;margin:1rem 0;
+                        font-size:0.9rem;color:#854d0e;"><strong>💡 Synthèse :</strong> {carte_score.recommandation}
+                        <br><span style="font-size:0.75rem;font-style:italic;">Cette synthèse est une aide à la décision, pas une décision — l'embauche reste une décision humaine.</span>
+                        </div>""",
+                        unsafe_allow_html=True,
+                    )
+
+                BADGE_STATUT = {
+                    "satisfait": ("✅", "#059669"),
+                    "partiel": ("🟡", "#d97706"),
+                    "absent": ("🔴", "#dc2626"),
+                }
+                st.markdown("#### 📋 Détail par exigence")
+                for v in carte_score.verdicts:
+                    icone, couleur = BADGE_STATUT[v.status]
+                    cat_badge = "🔒 indispensable" if v.categorie == "must_have" else "➕ souhaitable"
+                    with st.expander(f"{icone} {v.requirement} — {cat_badge}", expanded=(v.status == "absent")):
+                        st.markdown(
+                            f'<span style="color:{couleur};font-weight:700;text-transform:uppercase;'
+                            f'font-size:0.75rem;">{v.status}</span>',
+                            unsafe_allow_html=True,
+                        )
+                        if v.raisonnement:
+                            st.caption(v.raisonnement)
+                        if v.evidence:
+                            badge_preuve = "✅ citation vérifiée" if v.evidence_verifiee else "⚠️ citation non retrouvée dans le CV"
+                            st.markdown(f"**Preuve** ({badge_preuve}) : *« {v.evidence} »*")
+                        else:
+                            st.caption("Aucune preuve trouvée dans le CV.")
+
+                col_pf, col_lac = st.columns(2)
+                with col_pf:
+                    st.markdown("#### ✅ Points forts")
+                    for pf in carte_score.points_forts:
+                        st.markdown(f"- {pf}")
+                with col_lac:
+                    st.markdown("#### ⚠️ Lacunes")
+                    for lac in carte_score.lacunes:
+                        st.markdown(f"- {lac}")
+
+                with st.expander("📋 JSON détaillé", expanded=False):
+                    st.code(carte_score.model_dump_json(indent=2), language="json")
+
+                st.download_button(
+                    "⬇️ Télécharger le score (.json)",
+                    data=carte_score.model_dump_json(indent=2).encode("utf-8"),
+                    file_name=f"score_{carte_score.candidat.replace(' ', '_').lower()}.json",
+                    mime="application/json",
+                    use_container_width=True,
+                )
+
+
+st.markdown("---")
+
+
+# ==================================================================
+#  SECTION 5 — PRÉPARATION DE L'ENTRETIEN
+# ==================================================================
+section_header(5, "🎤", "Préparation de l'entretien", "rose")
+
+cv_pour_entretien = st.session_state.get("result_json", None)
+
+if not cv_pour_entretien:
+    empty_state(
+        "🎤",
+        "Convertissez d'abord le CV en JSON (section 3).",
+        "Le plan génère des questions ancrées dans le CV, chacune avec son barème de notation.",
+    )
+else:
+    try:
+        from src.entretien.contracts import LIBELLES_SECTION, SECTIONS, QuestionPlan
+        from src.entretien.question import PROVIDERS as ENTRETIEN_PROVIDERS
+        from src.entretien.question import generate_question_plan
+        entretien_ok = True
+    except ImportError as e:
+        entretien_ok = False
+        st.error(f"Module src.entretien introuvable : {e}")
+
+    if entretien_ok:
+        col_ent_cfg, col_ent_res = st.columns([1, 2], gap="large")
+
+        with col_ent_cfg:
+            provider_labels_ent = {
+                k: f"{v['badge']} {v['label']}" for k, v in ENTRETIEN_PROVIDERS.items()
+            }
+
+            provider_entretien = st.selectbox(
+                "🤖 Provider LLM (Entretien)",
+                options=list(ENTRETIEN_PROVIDERS.keys()),
+                format_func=lambda k: provider_labels_ent[k],
+                key="provider_entretien",
+            )
+
+            info_ent = ENTRETIEN_PROVIDERS[provider_entretien]
+            st.caption(info_ent["description"])
+
+            if provider_entretien == "ollama":
+                cle_entretien = st.text_input(
+                    "🦙 Modèle Ollama (Entretien)",
+                    value="qwen2.5:14b",
+                    help="Le plan d'entretien est exigeant : préférez un modèle ≥ 14B.",
+                    key="api_key_entretien",
+                )
+            else:
+                cle_entretien = st.text_input(
+                    f"🗝️ Clé API — {info_ent['env_key']}",
+                    type="password",
+                    placeholder=f"Collez votre {info_ent['env_key']} ici...",
+                    help=(
+                        "Obligatoire : ce module n'embarque aucune clé par défaut, "
+                        "contrairement aux sections 3 et 4."
+                    ),
+                    key="api_key_entretien",
+                )
+
+            job_desc_entretien = (st.session_state.get("job_desc_input") or "").strip()
+            carte_score_entretien = st.session_state.get("result_score", None)
+            # generate_question_plan attend un dict (lacunes/points_forts) : ScoreCard
+            # expose ces deux champs comme des listes calculées en Python, pas hallucinées.
+            score_entretien = carte_score_entretien.model_dump() if carte_score_entretien else None
+
+            if score_entretien:
+                st.success("✅ Scoring détecté — ses lacunes deviennent les points à sonder.")
+            else:
+                st.info("ℹ️ Sans scoring (section 4), les questions ne cibleront pas les écarts.")
+
+            if not job_desc_entretien:
+                st.warning("⚠️ Renseignez la description du poste en section 4.")
+
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            lancer_entretien = st.button(
+                "🎤 Générer le plan d'entretien",
+                disabled=not job_desc_entretien,
+                use_container_width=True,
+                key="btn_entretien",
+            )
+
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            plan_importe = st.file_uploader(
+                "📂 Ou réimporter un plan (.json)",
+                type=["json"],
+                help="Un plan téléchargé précédemment, pour reprendre sans régénérer.",
+                key="upload_plan",
+            )
+            if plan_importe is not None:
+                try:
+                    st.session_state["plan_entretien"] = QuestionPlan.model_validate_json(
+                        plan_importe.read().decode("utf-8")
+                    )
+                    st.success("✅ Plan réimporté.")
+                except Exception as e:
+                    st.error(f"❌ Plan invalide :\n\n{e}")
+
+        with col_ent_res:
+            if lancer_entretien and job_desc_entretien:
+                barre = st.progress(0.0, text="Démarrage…")
+
+                def _sur_progression(etape: str, fraction: float):
+                    barre.progress(min(max(fraction, 0.0), 1.0), text=etape)
+
+                debut_ent = time.perf_counter()
+                try:
+                    saisie = cle_entretien.strip() if cle_entretien else None
+                    est_ollama = provider_entretien == "ollama"
+
+                    plan_genere = generate_question_plan(
+                        cv_pour_entretien,
+                        job_desc_entretien,
+                        provider=provider_entretien,
+                        api_key=None if est_ollama else (saisie or None),
+                        model=saisie if est_ollama else None,
+                        scoring_json=score_entretien,
+                        on_progress=_sur_progression,
+                    )
+                    st.session_state["plan_entretien"] = plan_genere
+                    barre.empty()
+                    st.success(
+                        f"✅ Plan généré en {time.perf_counter() - debut_ent:.1f}s "
+                        f"({len(plan_genere.questions)} questions)"
+                    )
+                except ValueError as e:
+                    barre.empty()
+                    st.error(f"❌ Clé API manquante :\n\n{e}")
+                except Exception:
+                    barre.empty()
+                    st.error(f"❌ Erreur inattendue :\n\n```\n{traceback.format_exc()}\n```")
+
+            plan = st.session_state.get("plan_entretien", None)
+
+            if plan is None:
+                empty_state(
+                    "🎤",
+                    "Choisissez un provider et lancez la génération.",
+                    "Environ 11 questions réparties en 5 sections, barème compris.",
+                )
+            else:
+                if not lancer_entretien:
+                    st.info(f"🎤 Plan en mémoire — **{plan.candidat}** · *{plan.poste}*")
+
+                nb_q = len(plan.questions)
+                nb_ancres = sum(1 for q in plan.questions if q.ancrage_verifie)
+                nb_criteres = sum(len(q.rubric) for q in plan.questions)
+                nb_relances = sum(len(q.followups) for q in plan.questions)
+
+                st.markdown(
+                    f"""<div class="metric-row">
+                        <div class="metric-item"><div class="metric-value">{nb_q}</div><div class="metric-label">Questions</div></div>
+                        <div class="metric-item"><div class="metric-value">{nb_ancres}/{nb_q}</div><div class="metric-label">Ancrages vérifiés</div></div>
+                        <div class="metric-item"><div class="metric-value">{nb_criteres}</div><div class="metric-label">Critères</div></div>
+                        <div class="metric-item"><div class="metric-value">{nb_relances}</div><div class="metric-label">Relances</div></div>
+                    </div>""",
+                    unsafe_allow_html=True,
+                )
+
+                if plan.sections_echouees:
+                    tout_echoue = not plan.questions
+                    raisons = plan.erreurs or {}
+                    causes = set(raisons.values())
+
+                    titre = (
+                        "❌ Aucune section n'a abouti."
+                        if tout_echoue
+                        else f"⚠️ Sections non générées : **{', '.join(plan.sections_echouees)}**"
+                    )
+                    if not raisons:
+                        corps = ""
+                    elif len(causes) == 1:
+                        corps = f"\n\nCause : {next(iter(causes))}"
+                    else:
+                        corps = "\n\n" + "\n".join(
+                            f"- **{s}** : {r}" for s, r in raisons.items()
+                        )
+
+                    (st.error if tout_echoue else st.warning)(titre + corps)
+
+                if nb_ancres < nb_q:
+                    st.info(
+                        f"ℹ️ {nb_q - nb_ancres} question(s) portent un ancrage introuvable dans le CV "
+                        "(badge ⚠️) : à relire avant l'entretien."
+                    )
+
+                exigences = plan.brief.job.must_have
+                if exigences:
+                    st.markdown(
+                        f"""<div style="background:#fdf2f8;border-left:3px solid #db2777;
+                        border-radius:0 8px 8px 0;padding:0.7rem 1rem;margin:0.75rem 0;
+                        font-size:0.85rem;color:#9d174d;"><strong>Exigences ciblées :</strong>
+                        {" · ".join(exigences)}</div>""",
+                        unsafe_allow_html=True,
+                    )
+
+                for section in SECTIONS:
+                    lot = plan.par_section(section)
+                    if not lot:
+                        continue
+
+                    libelle = LIBELLES_SECTION.get(section, section)
+                    with st.expander(
+                        f"{libelle} — {len(lot)} question(s)",
+                        expanded=(section == "technique"),
+                    ):
+                        for q in lot:
+                            badge = "✅" if q.ancrage_verifie else "⚠️"
+                            st.markdown(
+                                f"`{q.id}` · **{q.target_competency}** · difficulté {q.difficulty}/5"
+                            )
+                            st.markdown(f"> {q.question}")
+                            st.caption(f"{badge} Ancrage CV : {q.ancrage_cv or '—'}")
+
+                            st.markdown("**Barème de notation**")
+                            for critere in q.rubric:
+                                st.markdown(
+                                    f"- `{critere.weight:.2f}` **{critere.criterion}** — {critere.description}"
+                                )
+
+                            if q.followups:
+                                st.markdown("**Relances**")
+                                for relance in q.followups:
+                                    st.markdown(f"- {relance}")
+
+                            st.markdown("---")
+
+                nom_plan = (plan.candidat or "candidat").replace(" ", "_").lower()
+                st.download_button(
+                    "⬇️ Télécharger le plan (.json)",
+                    data=plan.model_dump_json(indent=2).encode("utf-8"),
+                    file_name=f"plan_entretien_{nom_plan}.json",
+                    mime="application/json",
+                    use_container_width=True,
+                )
 
 
 # ==================================================================
@@ -760,6 +1016,8 @@ st.markdown(
         Extraction : MarkItDown · RapidOCR · LLMWhisperer
         &nbsp;|&nbsp;
         JSON : Groq · Gemini · OpenRouter
+        &nbsp;|&nbsp;
+        Entretien : plan structuré, barème inclus
     </div>
     """,
     unsafe_allow_html=True,

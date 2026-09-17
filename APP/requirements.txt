@@ -38,3 +38,9 @@ google-genai>=2.0.0          # SDK officiel Google Gemini (nouveau) - gemini_pro
 # ---- Provider 3 : OpenRouter (compatible OpenAI) -----------
 openai>=1.30.0               # SDK OpenAI utilisé comme client OpenRouter - openrouter_provider.py
 
+# ============================================================
+# ENTRETIEN — Préparation du plan de questions
+# ============================================================
+pydantic>=2.0                # Contrats de données validés (src/entretien/contracts.py)
+python-dotenv>=1.0           # Chargement des clés API depuis APP/.env - src/__init__.py
+

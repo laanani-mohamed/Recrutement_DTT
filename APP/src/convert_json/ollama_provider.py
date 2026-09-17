@@ -29,7 +29,8 @@ Le JSON doit suivre exactement cette structure :
       "entreprise": "string",
       "debut": "string ou null",
       "fin": "string ou null",
-      "description": "string ou null"
+      "resume": "string ou null (ta synthèse en 1 phrase de cette expérience)",
+      "description": "string ou null (texte ORIGINAL du CV pour cette expérience, copié mot à mot)"
     }
   ],
   "formation": [
@@ -46,6 +47,11 @@ Le JSON doit suivre exactement cette structure :
     "portfolio": "string ou null"
   }
 }
+
+RÈGLE ABSOLUE sur "description" : c'est une CITATION, pas une synthèse. Recopie le texte
+du CV tel quel pour cette expérience (mêmes mots, même ordre), sans corriger, reformuler
+ni compléter. "resume" est ta synthèse ; "description" est la citation brute, mot pour mot.
+Si le CV ne détaille pas cette expérience par du texte, "description" est null.
 
 Réponds UNIQUEMENT avec le JSON, sans markdown, sans explication."""
 

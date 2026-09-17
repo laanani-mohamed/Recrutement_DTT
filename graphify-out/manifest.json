@@ -1,0 +1,162 @@
+{
+  "APP/src/__init__.py": {
+    "mtime": 1789399301.6524572,
+    "ast_hash": "ebc9f078b9dc8e08890b6bd69fd032e4",
+    "semantic_hash": ""
+  },
+  "APP/src/convert_json/__init__.py": {
+    "mtime": 1787738043.815881,
+    "ast_hash": "1f192cffa8c810376b7b71b24a5d4da3",
+    "semantic_hash": ""
+  },
+  "APP/src/convert_json/gemini_provider.py": {
+    "mtime": 1787738057.677787,
+    "ast_hash": "9f4dd66c2bd236e8b7d3da89275e0b07",
+    "semantic_hash": ""
+  },
+  "APP/src/convert_json/groq_provider.py": {
+    "mtime": 1787738057.6762908,
+    "ast_hash": "b7941864f9a8ca911eced60d5b111129",
+    "semantic_hash": ""
+  },
+  "APP/src/convert_json/main_convert_json.py": {
+    "mtime": 1787741581.0891469,
+    "ast_hash": "163f50bd99de4963e6f5d02a1c0a6cc4",
+    "semantic_hash": ""
+  },
+  "APP/src/convert_json/ollama_provider.py": {
+    "mtime": 1787743843.6223257,
+    "ast_hash": "6c524e499c26799b4b6cb978a6fb8d94",
+    "semantic_hash": ""
+  },
+  "APP/src/convert_json/openrouter_provider.py": {
+    "mtime": 1787738057.6782763,
+    "ast_hash": "8c7fb418eb190f7c3147b79bd160c906",
+    "semantic_hash": ""
+  },
+  "APP/src/debug.py": {
+    "mtime": 1789399043.7415955,
+    "ast_hash": "3451e7deed895513b456329ccf7bbb5f",
+    "semantic_hash": ""
+  },
+  "APP/src/entretien/__init__.py": {
+    "mtime": 1789398207.101723,
+    "ast_hash": "c144f7b980960238093716c81515a757",
+    "semantic_hash": ""
+  },
+  "APP/src/entretien/contracts.py": {
+    "mtime": 1789399007.9458134,
+    "ast_hash": "66506900fa2c8d2726b50bd1b212d473",
+    "semantic_hash": ""
+  },
+  "APP/src/entretien/errors.py": {
+    "mtime": 1789398987.299838,
+    "ast_hash": "0f0ce7a97ea67604648bb137af23a1a8",
+    "semantic_hash": ""
+  },
+  "APP/src/entretien/json_utils.py": {
+    "mtime": 1789398224.3146718,
+    "ast_hash": "6bc19cf80aeafb8834237798098099eb",
+    "semantic_hash": ""
+  },
+  "APP/src/entretien/question/__init__.py": {
+    "mtime": 1789398250.41524,
+    "ast_hash": "b6b134b54f2bc72a07efc3bbf9a4ca89",
+    "semantic_hash": ""
+  },
+  "APP/src/entretien/question/gemini_provider.py": {
+    "mtime": 1789399361.074107,
+    "ast_hash": "1ce568b69daafb7873d9c1a9c40d6700",
+    "semantic_hash": ""
+  },
+  "APP/src/entretien/question/groq_provider.py": {
+    "mtime": 1789398992.181295,
+    "ast_hash": "3676be1b8c55d98c1375fc57f3e54cb6",
+    "semantic_hash": ""
+  },
+  "APP/src/entretien/question/main_question.py": {
+    "mtime": 1789398373.932944,
+    "ast_hash": "b921f58ded0bbb1b69c370de66a347a4",
+    "semantic_hash": ""
+  },
+  "APP/src/entretien/question/ollama_provider.py": {
+    "mtime": 1789398289.05416,
+    "ast_hash": "8756e3a8bce65b2b8990f156b122c1a2",
+    "semantic_hash": ""
+  },
+  "APP/src/entretien/question/openrouter_provider.py": {
+    "mtime": 1789399001.3640602,
+    "ast_hash": "7a896b714d2b23301aa563548c425ae2",
+    "semantic_hash": ""
+  },
+  "APP/src/entretien/question/pipeline.py": {
+    "mtime": 1789399022.974587,
+    "ast_hash": "e3adc828d19d203c9e202081a9e36513",
+    "semantic_hash": ""
+  },
+  "APP/src/entretien/question/prompts.py": {
+    "mtime": 1789398273.8236327,
+    "ast_hash": "afb7585ad4ac3d90d874d6aabeea9267",
+    "semantic_hash": ""
+  },
+  "APP/src/entretien/sanitize.py": {
+    "mtime": 1789398238.1896431,
+    "ast_hash": "5ab1b319f972222352730d81d3a02e40",
+    "semantic_hash": ""
+  },
+  "APP/src/extraction/__init__.py": {
+    "mtime": 1787174365.4134798,
+    "ast_hash": "2560d626618e4d6bf7d985dbff2146fe",
+    "semantic_hash": ""
+  },
+  "APP/src/extraction/llmwhispirer_ocr.py": {
+    "mtime": 1787174291.31233,
+    "ast_hash": "93241ac20d8b12582d04d7eadf54e93f",
+    "semantic_hash": ""
+  },
+  "APP/src/extraction/main_extraction.py": {
+    "mtime": 1787174356.101554,
+    "ast_hash": "7de4b6118ac98c3fb082566f718734bc",
+    "semantic_hash": ""
+  },
+  "APP/src/extraction/markitdown_ocr.py": {
+    "mtime": 1787174329.37123,
+    "ast_hash": "ce41f9fda43ec56595e220a8396bde1f",
+    "semantic_hash": ""
+  },
+  "APP/src/extraction/rapid_ocr.py": {
+    "mtime": 1787175065.4706163,
+    "ast_hash": "bb23c6e290c5700eedd1b68a37641c72",
+    "semantic_hash": ""
+  },
+  "APP/src/scoring/__init__.py": {
+    "mtime": 1787739196.0196779,
+    "ast_hash": "941b68c027d6afbeda5fcfb7d834898b",
+    "semantic_hash": ""
+  },
+  "APP/src/scoring/gemini_provider.py": {
+    "mtime": 1787742328.511403,
+    "ast_hash": "050456fbec022140117b6b736564bc3e",
+    "semantic_hash": ""
+  },
+  "APP/src/scoring/groq_provider.py": {
+    "mtime": 1787742326.1274989,
+    "ast_hash": "589ac91beaf033e6eb714b79a1f82a66",
+    "semantic_hash": ""
+  },
+  "APP/src/scoring/main_scoring.py": {
+    "mtime": 1787741599.8441424,
+    "ast_hash": "f204ff784bd6bca6b82969aa00883e42",
+    "semantic_hash": ""
+  },
+  "APP/src/scoring/ollama_provider.py": {
+    "mtime": 1787742645.0034566,
+    "ast_hash": "7c69e1e0ef3c54da9461e51e30db8a92",
+    "semantic_hash": ""
+  },
+  "APP/src/scoring/openrouter_provider.py": {
+    "mtime": 1787742329.5393226,
+    "ast_hash": "7036a475a63e82b3bcd245a07e3d530e",
+    "semantic_hash": ""
+  }
+}

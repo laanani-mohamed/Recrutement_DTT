@@ -86,7 +86,9 @@ def convert_cv(cv_text: str, provider: ProviderName = "groq", api_key: str = Non
             - titre_poste, resume
             - competences (liste)
             - langues (liste de dicts langue/niveau)
-            - experience (liste de postes)
+            - experience (liste de postes) : chaque poste porte
+                - resume : synthèse de l'expérience par le LLM (1 phrase)
+                - description : citation verbatim du CV pour ce poste, aucun ajout IA
             - formation (liste de diplômes)
             - certifications (liste)
             - liens (linkedin, github, portfolio)
