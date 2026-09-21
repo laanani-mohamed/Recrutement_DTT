@@ -9,15 +9,13 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from src.shared.contracts import JobSpec
+from src.shared.contracts import POIDS_STATUT, JobSpec, Statut
 
 __all__ = ["Statut", "POIDS_STATUT", "POIDS_CATEGORIE", "RequirementVerdict", "ScoreCard", "JobSpec"]
 
-Statut = Literal["satisfait", "partiel", "absent"]
 Categorie = Literal["must_have", "nice_to_have"]
 
-# Poids utilisés par ScoreCard.calculer_score() — jamais choisis par le LLM.
-POIDS_STATUT: dict[str, float] = {"satisfait": 1.0, "partiel": 0.5, "absent": 0.0}
+# Poids de catégorie utilisés par ScoreCard.calculer_score() — jamais choisis par le LLM.
 POIDS_CATEGORIE: dict[str, float] = {"must_have": 3.0, "nice_to_have": 1.0}
 
 

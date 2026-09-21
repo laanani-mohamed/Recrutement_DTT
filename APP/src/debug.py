@@ -61,6 +61,8 @@ st.markdown(
         --accent-green: #059669;
         --accent-amber: #d97706;
         --accent-rose:  #db2777;
+        --accent-indigo:#4f46e5;
+        --accent-teal:  #0d9488;
         --text-primary: #0f172a;
         --text-muted:   #64748b;
         --border:       #e2e8f0;
@@ -119,6 +121,8 @@ st.markdown(
     .bg-purple { background: var(--accent-purple); }
     .bg-amber  { background: var(--accent-amber); }
     .bg-rose   { background: var(--accent-rose); }
+    .bg-indigo { background: var(--accent-indigo); }
+    .bg-teal   { background: var(--accent-teal); }
 
     /* ---- Metric cards ---- */
     .metric-row { display: flex; gap: 0.75rem; margin: 0.75rem 0; flex-wrap: wrap; }
@@ -231,7 +235,7 @@ st.markdown(
     """
     <div class="hero-header">
         <h1>📋 CV Pipeline</h1>
-        <p>Upload → Extraction → JSON → Scoring → Entretien</p>
+        <p>Upload → Extraction → JSON → Scoring → Entretien → Live → Analyse</p>
     </div>
     """,
     unsafe_allow_html=True,
@@ -1004,6 +1008,313 @@ else:
                 )
 
 
+st.markdown("---")
+
+
+# ==================================================================
+#  SECTION 6 — ENTRETIEN LIVE (déroule le plan, aucun appel LLM)
+# ==================================================================
+section_header(6, "🎙️", "Entretien live", "indigo")
+
+plan_pour_live = st.session_state.get("plan_entretien", None)
+
+if plan_pour_live is None:
+    empty_state(
+        "🎙️",
+        "Générez d'abord un plan d'entretien (section 5).",
+        "L'entretien déroule les questions déjà préparées — aucun appel IA pendant l'entretien.",
+    )
+else:
+    try:
+        from src.entretien.contracts import InterviewSession
+        from src.entretien.live import (
+            demarrer,
+            formater_duree,
+            formater_horodatage,
+            question_courante,
+            soumettre_reponse,
+            texte_a_poser,
+        )
+        live_ok = True
+    except ImportError as e:
+        live_ok = False
+        st.error(f"Module src.entretien.live introuvable : {e}")
+
+    if live_ok:
+        session_live = st.session_state.get("interview_session")
+        if session_live is not None and not isinstance(session_live, InterviewSession):
+            # Session créée en mémoire avant un rechargement à chaud du schéma
+            # (le module a changé pendant que le serveur Streamlit tournait) :
+            # l'ancien objet n'a pas les champs actuels. On repart proprement.
+            st.session_state.pop("interview_session", None)
+            session_live = None
+            st.info("ℹ️ Session précédente incompatible (schéma mis à jour) — redémarrez l'entretien.")
+
+        col_live_ctrl, _ = st.columns([1, 2], gap="large")
+        with col_live_ctrl:
+            libelle_demarrage = "🔄 Recommencer l'entretien" if session_live else "🎙️ Démarrer l'entretien"
+            if st.button(libelle_demarrage, use_container_width=True, key="btn_demarrer_live"):
+                session_live = demarrer(plan_pour_live)
+                st.session_state["interview_session"] = session_live
+                st.rerun()
+
+        if session_live is None:
+            empty_state("🎙️", "Cliquez sur « Démarrer l'entretien » pour commencer.")
+        else:
+            question = question_courante(session_live)
+
+            if question is not None:
+                total = len(session_live.plan.questions)
+                st.progress(
+                    session_live.cursor / total if total else 0.0,
+                    text=f"Question {session_live.cursor + 1} / {total}",
+                )
+
+                est_relance = session_live.relance_utilisee
+                badge_type = "🔁 Relance" if est_relance else f"`{question.id}` · {question.target_competency}"
+                st.markdown(f"**{badge_type}**")
+                st.markdown(f"### {texte_a_poser(session_live)}")
+
+                with st.form(key=f"form_reponse_{len(session_live.reponses)}"):
+                    reponse_candidat = st.text_area(
+                        "Votre réponse",
+                        height=140,
+                        placeholder="Tapez votre réponse ici...",
+                        label_visibility="collapsed",
+                    )
+                    envoyer = st.form_submit_button("➡️ Envoyer", use_container_width=True)
+
+                if envoyer and reponse_candidat.strip():
+                    st.session_state["interview_session"] = soumettre_reponse(
+                        session_live, reponse_candidat.strip()
+                    )
+                    st.rerun()
+                elif envoyer:
+                    st.warning("⚠️ La réponse est vide.")
+
+            else:
+                st.success("✅ Entretien terminé — merci pour vos réponses.")
+
+                st.markdown("#### 📝 Transcript complet")
+                reponses_par_question: dict[str, list] = {}
+                for r in session_live.reponses:
+                    reponses_par_question.setdefault(r.question_id, []).append(r)
+
+                for q in session_live.plan.questions:
+                    lot_reponses = reponses_par_question.get(q.id, [])
+                    with st.expander(f"`{q.id}` · {q.target_competency}", expanded=False):
+                        st.markdown(f"**Q :** {q.question}")
+                        for r in lot_reponses:
+                            if r.est_relance:
+                                st.caption(f"🔁 Relance : {q.followups[0] if q.followups else ''}")
+                            st.markdown(f"**R :** {r.reponse}")
+                            st.caption(
+                                f"🕐 {formater_horodatage(r.horodatage)} · "
+                                f"⏱ {formater_duree(r.duree_reponse_s)}"
+                            )
+
+                nom_session = (session_live.plan.candidat or "candidat").replace(" ", "_").lower()
+                st.download_button(
+                    "⬇️ Télécharger la session d'entretien (.json)",
+                    data=session_live.model_dump_json(indent=2).encode("utf-8"),
+                    file_name=f"entretien_{nom_session}.json",
+                    mime="application/json",
+                    use_container_width=True,
+                )
+
+
+st.markdown("---")
+
+
+# ==================================================================
+#  SECTION 7 — ANALYSE DE L'ENTRETIEN (note chaque réponse contre son barème)
+# ==================================================================
+section_header(7, "📊", "Analyse de l'entretien", "teal")
+
+session_pour_analyse = st.session_state.get("interview_session", None)
+
+if session_pour_analyse is None or not session_pour_analyse.reponses:
+    empty_state(
+        "📊",
+        "Menez d'abord un entretien avec au moins une réponse (section 6).",
+        "Chaque réponse est notée contre le barème de sa question — le score est calculé "
+        "en Python, jamais deviné par l'IA.",
+    )
+else:
+    try:
+        from src.entretien.evaluation import evaluate_interview
+        from src.entretien.evaluation import PROVIDERS as EVAL_PROVIDERS
+        eval_ok = True
+    except ImportError as e:
+        eval_ok = False
+        st.error(f"Module src.entretien.evaluation introuvable : {e}")
+
+    if eval_ok:
+        if session_pour_analyse.statut != "termine":
+            st.info("ℹ️ Entretien non terminé — seules les questions déjà répondues seront notées.")
+
+        col_eval_cfg, col_eval_res = st.columns([1, 2], gap="large")
+
+        with col_eval_cfg:
+            provider_labels_eval = {
+                k: f"{v['badge']} {v['label']}" for k, v in EVAL_PROVIDERS.items()
+            }
+            provider_choisi_eval = st.selectbox(
+                "🤖 Provider LLM (Analyse)",
+                options=list(EVAL_PROVIDERS.keys()),
+                format_func=lambda k: provider_labels_eval[k],
+                key="provider_eval",
+            )
+            info_prov_eval = EVAL_PROVIDERS[provider_choisi_eval]
+            st.caption(info_prov_eval["description"])
+
+            if provider_choisi_eval == "ollama":
+                api_key_eval = st.text_input(
+                    "🦙 Modèle Ollama (Analyse)",
+                    value="qwen2.5:14b",
+                    key="api_key_eval",
+                )
+            else:
+                api_key_eval = st.text_input(
+                    f"🗝️ Clé API — {info_prov_eval['env_key']}",
+                    type="password",
+                    placeholder=f"Collez votre {info_prov_eval['env_key']} ici...",
+                    key="api_key_eval",
+                )
+
+            st.markdown("<br>", unsafe_allow_html=True)
+            lancer_eval = st.button(
+                "📊 Analyser les réponses", use_container_width=True, key="btn_eval"
+            )
+
+        with col_eval_res:
+            if lancer_eval:
+                barre_eval = st.progress(0.0, text="Démarrage…")
+
+                def _sur_progression_eval(etape: str, fraction: float):
+                    barre_eval.progress(min(max(fraction, 0.0), 1.0), text=etape)
+
+                debut_eval = time.perf_counter()
+                try:
+                    cle_eval = api_key_eval.strip() if api_key_eval else None
+                    est_ollama_eval = provider_choisi_eval == "ollama"
+
+                    resultat_eval = evaluate_interview(
+                        session_pour_analyse,
+                        provider=provider_choisi_eval,
+                        api_key=None if est_ollama_eval else (cle_eval or None),
+                        model=cle_eval if est_ollama_eval else None,
+                        on_progress=_sur_progression_eval,
+                    )
+                    st.session_state["interview_evaluation"] = resultat_eval
+                    barre_eval.empty()
+                    st.success(
+                        f"✅ Analyse terminée en {time.perf_counter() - debut_eval:.1f}s "
+                        f"({len(resultat_eval.reponses_evaluees)} question(s) notée(s))"
+                    )
+                except ValueError as e:
+                    barre_eval.empty()
+                    st.error(f"❌ Clé API manquante :\n\n{e}")
+                except Exception:
+                    barre_eval.empty()
+                    st.error(f"❌ Erreur lors de l'analyse :\n\n```\n{traceback.format_exc()}\n```")
+
+            evaluation = st.session_state.get("interview_evaluation", None)
+
+            if evaluation is None:
+                empty_state("📊", "Choisissez un provider et lancez l'analyse.")
+            else:
+                if not lancer_eval:
+                    st.info(f"📊 Analyse en mémoire — **{evaluation.candidat}** · *{evaluation.poste}*")
+
+                score_eval = evaluation.score_global
+                couleur_eval = "green" if score_eval >= 70 else "amber" if score_eval >= 40 else "rose"
+                st.markdown(
+                    f'''<div style="text-align: center; margin-bottom: 1rem;">
+                        <div style="font-size: 3.5rem; font-weight: 800; color: var(--accent-{couleur_eval});">{score_eval}%</div>
+                        <div style="font-size: 1rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;">Score global de l'entretien</div>
+                    </div>''',
+                    unsafe_allow_html=True,
+                )
+
+                nb_notees = len(evaluation.reponses_evaluees)
+                nb_criteres_eval = sum(len(e.criteres) for e in evaluation.reponses_evaluees)
+                nb_verifiees_eval = sum(
+                    1 for e in evaluation.reponses_evaluees for c in e.criteres if c.citation_verifiee
+                )
+                st.markdown(
+                    f"""<div class="metric-row">
+                        <div class="metric-item"><div class="metric-value">{nb_notees}</div><div class="metric-label">Questions notées</div></div>
+                        <div class="metric-item"><div class="metric-value">{nb_criteres_eval}</div><div class="metric-label">Critères jugés</div></div>
+                        <div class="metric-item"><div class="metric-value">{nb_verifiees_eval}/{nb_criteres_eval}</div><div class="metric-label">Citations vérifiées</div></div>
+                    </div>""",
+                    unsafe_allow_html=True,
+                )
+
+                if evaluation.questions_echouees:
+                    st.warning(f"⚠️ Questions non analysées : **{', '.join(evaluation.questions_echouees)}**")
+
+                if evaluation.recommandation:
+                    st.markdown(
+                        f"""<div style="background:#fefce8;border-left:3px solid #ca8a04;
+                        border-radius:0 8px 8px 0;padding:0.7rem 1rem;margin:1rem 0;
+                        font-size:0.9rem;color:#854d0e;"><strong>💡 Synthèse :</strong> {evaluation.recommandation}
+                        <br><span style="font-size:0.75rem;font-style:italic;">Aide à la décision, pas une décision — l'embauche reste une décision humaine.</span>
+                        </div>""",
+                        unsafe_allow_html=True,
+                    )
+
+                questions_par_id = {q.id: q for q in session_pour_analyse.plan.questions}
+                BADGE_STATUT_CRITERE = {
+                    "satisfait": ("✅", "#059669"),
+                    "partiel": ("🟡", "#d97706"),
+                    "absent": ("🔴", "#dc2626"),
+                }
+
+                st.markdown("#### 📋 Détail par question")
+                for ea in evaluation.reponses_evaluees:
+                    q = questions_par_id.get(ea.question_id)
+                    competence = q.target_competency if q else ea.question_id
+                    with st.expander(f"`{ea.question_id}` · {competence} — {ea.score}%", expanded=(ea.score < 50)):
+                        if q:
+                            st.markdown(f"**Q :** {q.question}")
+                        for c in ea.criteres:
+                            icone, couleur_c = BADGE_STATUT_CRITERE[c.statut]
+                            st.markdown(
+                                f'{icone} **{c.criterion}** — '
+                                f'<span style="color:{couleur_c};font-weight:700;text-transform:uppercase;font-size:0.7rem;">{c.statut}</span>',
+                                unsafe_allow_html=True,
+                            )
+                            if c.raisonnement:
+                                st.caption(c.raisonnement)
+                            if c.citation:
+                                badge_citation = "✅ vérifiée" if c.citation_verifiee else "⚠️ non retrouvée"
+                                st.markdown(f"↳ *« {c.citation} »* ({badge_citation})")
+                        st.markdown("---")
+
+                col_pf_eval, col_lac_eval = st.columns(2)
+                with col_pf_eval:
+                    st.markdown("#### ✅ Points forts")
+                    for pf in evaluation.points_forts:
+                        st.markdown(f"- {pf}")
+                with col_lac_eval:
+                    st.markdown("#### ⚠️ Lacunes")
+                    for lac in evaluation.lacunes:
+                        st.markdown(f"- {lac}")
+
+                with st.expander("📋 JSON détaillé", expanded=False):
+                    st.code(evaluation.model_dump_json(indent=2), language="json")
+
+                nom_eval = (evaluation.candidat or "candidat").replace(" ", "_").lower()
+                st.download_button(
+                    "⬇️ Télécharger l'analyse (.json)",
+                    data=evaluation.model_dump_json(indent=2).encode("utf-8"),
+                    file_name=f"analyse_entretien_{nom_eval}.json",
+                    mime="application/json",
+                    use_container_width=True,
+                )
+
+
 # ==================================================================
 #  PIED DE PAGE
 # ==================================================================
@@ -1018,6 +1329,10 @@ st.markdown(
         JSON : Groq · Gemini · OpenRouter
         &nbsp;|&nbsp;
         Entretien : plan structuré, barème inclus
+        &nbsp;|&nbsp;
+        Live : déroulement déterministe, zéro appel IA
+        &nbsp;|&nbsp;
+        Analyse : notation par critère, score calculé en Python
     </div>
     """,
     unsafe_allow_html=True,

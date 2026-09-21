@@ -81,20 +81,27 @@ def encadrer(contenu: str) -> str:
     return f"{BALISE_OUVRANTE}\n{contenu}\n{BALISE_FERMANTE}"
 
 
-def _tokens(texte: str) -> set[str]:
+def tokenize(texte: str) -> set[str]:
+    """Ensemble de mots normalisés (minuscules, sans accent, >2 lettres).
+
+    Public : réutilisé pour le recouvrement citation/CV (citation_est_verifiee)
+    et pour le recouvrement réponse/barème en entretien live.
+    """
     decompose = unicodedata.normalize("NFKD", texte.lower())
     sans_accent = "".join(c for c in decompose if not unicodedata.combining(c))
     return {mot for mot in _MOT.findall(sans_accent) if len(mot) > 2}
 
 
-def citation_est_verifiee(citation: str, cv_propre: dict, seuil: float = 0.6) -> bool:
-    """Vrai si la citation recoupe assez le CV réel pour ne pas être une invention.
+def citation_est_verifiee(citation: str, corpus: dict | str, seuil: float = 0.6) -> bool:
+    """Vrai si la citation recoupe assez le corpus réel pour ne pas être une invention.
 
-    Utilisé pour l'ancrage des questions d'entretien (ancrage_cv) et pour les
-    preuves du scoring (evidence) : même principe, même seuil.
+    corpus est un dict (CV assaini) ou un texte brut (ex: réponse d'un candidat en
+    entretien). Utilisé pour l'ancrage des questions (ancrage_cv), les preuves du
+    scoring (evidence) et les citations de l'évaluation d'entretien : même principe.
     """
-    mots_citation = _tokens(citation)
+    mots_citation = tokenize(citation)
     if not mots_citation:
         return False
-    mots_cv = _tokens(json.dumps(cv_propre, ensure_ascii=False))
-    return len(mots_citation & mots_cv) / len(mots_citation) >= seuil
+    texte_corpus = json.dumps(corpus, ensure_ascii=False) if isinstance(corpus, dict) else str(corpus)
+    mots_corpus = tokenize(texte_corpus)
+    return len(mots_citation & mots_corpus) / len(mots_citation) >= seuil

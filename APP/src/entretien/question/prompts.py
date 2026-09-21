@@ -49,7 +49,8 @@ _SQUELETTE_SECTION = """{
         {"criterion": "critère observable", "weight": 2, "description": "ce qui distingue une réponse qui satisfait ce critère"},
         {"criterion": "autre critère observable", "weight": 1, "description": "..."}
       ],
-      "followups": ["relance à poser si la réponse reste en surface"]
+      "followups": ["relance à poser si la réponse reste en surface"],
+      "reponse_ideale": "une réponse de référence complète, couvrant tous les critères du barème"
     }
   ]
 }"""
@@ -68,6 +69,9 @@ RÈGLES ABSOLUES :
 - Chaque question porte son barème "rubric" : 2 à 4 critères OBSERVABLES, vérifiables en
   lisant la réponse. Jamais de critère vague comme « bonne réponse » ou « bon niveau ».
 - Chaque question porte 1 à 3 relances "followups" qui creusent si la réponse reste vague.
+- Chaque question porte une "reponse_ideale" : une réponse de référence qui couvrirait tous
+  les critères du barème. Elle servira à noter les vraies réponses plus tard — reste réaliste,
+  pas une réponse parfaite artificielle.
 - Tu n'attribues AUCUNE note et AUCUN score. Tu prépares les questions et leur grille.
 - Tu écris en français.
 
