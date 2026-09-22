@@ -97,7 +97,7 @@ def classify_with_groq(cv_text: str, api_key: str = None) -> dict:
         RuntimeError: Si l'API Groq retourne une erreur ou un JSON invalide.
     """
     # Récupération de la clé API
-    key = api_key or os.environ.get("GROQ_API_KEY", "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")
+    key = api_key or os.environ.get("GROQ_API_KEY")
     if not key:
         raise ValueError(
             "Clé API Groq manquante. "

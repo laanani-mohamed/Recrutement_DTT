@@ -45,6 +45,7 @@ _SQUELETTE_SECTION = """{
       "difficulty": 3,
       "question": "la question posée au candidat",
       "ancrage_cv": "le fait exact du CV qui justifie cette question",
+      "ancrage_poste": "l'exigence ou l'extrait exact de la fiche de poste que cette question vérifie",
       "rubric": [
         {"criterion": "critère observable", "weight": 2, "description": "ce qui distingue une réponse qui satisfait ce critère"},
         {"criterion": "autre critère observable", "weight": 1, "description": "..."}
@@ -66,6 +67,8 @@ Consigne de section : {CONSIGNES_SECTION.get(section, "")}
 RÈGLES ABSOLUES :
 - Chaque question est ANCRÉE dans un fait précis du CV, cité tel quel dans "ancrage_cv".
   Une question qu'on pourrait poser à n'importe quel candidat est un échec.
+- Chaque question est AUSSI ANCRÉE dans la fiche de poste : cite tel quel, dans "ancrage_poste",
+  l'exigence ou l'extrait exact du poste que la question vérifie.
 - Chaque question porte son barème "rubric" : 2 à 4 critères OBSERVABLES, vérifiables en
   lisant la réponse. Jamais de critère vague comme « bonne réponse » ou « bon niveau ».
 - Chaque question porte 1 à 3 relances "followups" qui creusent si la réponse reste vague.
@@ -82,7 +85,7 @@ Produis exactement {quota} question(s). Structure exacte attendue :
 """ + _SQUELETTE_SECTION
 
 
-def user_section(cv_propre: dict, brief: InterviewBrief) -> str:
+def user_section(cv_propre: dict, brief: InterviewBrief, jd_propre: str) -> str:
     return (
         "--- POSTE À POURVOIR ---\n"
         f"Intitulé : {brief.job.titre}\n"
@@ -91,6 +94,8 @@ def user_section(cv_propre: dict, brief: InterviewBrief) -> str:
         "--- POINTS À SONDER EN PRIORITÉ ---\n"
         f"Écarts détectés au scoring : {', '.join(brief.probe_targets) or 'aucun'}\n"
         f"Points forts à confirmer : {', '.join(brief.points_forts) or 'aucun'}\n\n"
+        "--- FICHE DE POSTE (texte original, pour citer \"ancrage_poste\" mot à mot) ---\n"
+        + encadrer(jd_propre) + "\n\n"
         "--- CV DU CANDIDAT ---\n"
         + encadrer(json.dumps(cv_propre, ensure_ascii=False, indent=2))
     )

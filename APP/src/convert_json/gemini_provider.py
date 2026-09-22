@@ -98,7 +98,7 @@ def classify_with_gemini(cv_text: str, api_key: str = None) -> dict:
         RuntimeError: Si l'API Gemini retourne une erreur ou un JSON invalide.
     """
     # Récupération de la clé API
-    key = api_key or os.environ.get("GEMINI_API_KEY", "AQ.Ab8RN6JfyHuPUjPj22VlGLb0thlaJKfEn0Hyv0QkKZ5SFd-21w")
+    key = api_key or os.environ.get("GEMINI_API_KEY")
     if not key:
         raise ValueError(
             "Clé API Gemini manquante. "

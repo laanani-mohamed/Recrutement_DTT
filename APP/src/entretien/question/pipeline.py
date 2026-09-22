@@ -70,10 +70,12 @@ def _parser_questions(brut: str, section: str) -> list[Question]:
 
 
 def _generer_section(
-    appel: AppelLLM, section: str, cv_propre: dict, brief: InterviewBrief
+    appel: AppelLLM, section: str, cv_propre: dict, brief: InterviewBrief, jd_propre: str
 ) -> list[Question]:
     """Génère les questions d'une section, avec une unique tentative de réparation."""
-    brut = appel(system_section(section), user_section(cv_propre, brief), MAX_TOKENS_SECTION)
+    brut = appel(
+        system_section(section), user_section(cv_propre, brief, jd_propre), MAX_TOKENS_SECTION
+    )
 
     try:
         return _parser_questions(brut, section)
@@ -93,6 +95,7 @@ def _assembler(
     cibles: Sequence[str],
     cv_propre: dict,
     cv_json: dict,
+    jd_propre: str,
     brief: InterviewBrief,
     provider: str,
 ) -> QuestionPlan:
@@ -121,6 +124,7 @@ def _assembler(
             compteurs[section] = compteurs.get(section, 0) + 1
             q.id = f"q_{section}_{compteurs[section]:02d}"
             q.ancrage_verifie = citation_est_verifiee(q.ancrage_cv, cv_propre)
+            q.ancrage_poste_verifie = citation_est_verifiee(q.ancrage_poste, jd_propre)
             questions.append(q)
 
     return QuestionPlan(
@@ -159,7 +163,7 @@ def run(
 
     def executer(section: str):
         try:
-            return section, _generer_section(appel, section, cv_propre, brief), None
+            return section, _generer_section(appel, section, cv_propre, brief, jd_propre), None
         except CleApiManquante:
             raise
         except Exception as e:
@@ -184,6 +188,6 @@ def run(
                     0.1 + 0.8 * len(resultats) / total,
                 )
 
-    plan = _assembler(resultats, cibles, cv_propre, cv_json, brief, provider)
+    plan = _assembler(resultats, cibles, cv_propre, cv_json, jd_propre, brief, provider)
     _avancer(on_progress, "Plan assemblé", 1.0)
     return plan

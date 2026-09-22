@@ -113,7 +113,7 @@ def classify_with_openrouter(cv_text: str, api_key: str = None, model: str = Non
         RuntimeError: Si l'API retourne une erreur ou un JSON invalide.
     """
     # Récupération de la clé API
-    key = api_key or os.environ.get("OPENROUTER_API_KEY", "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")
+    key = api_key or os.environ.get("OPENROUTER_API_KEY")
     if not key:
         raise ValueError(
             "Clé API OpenRouter manquante. "

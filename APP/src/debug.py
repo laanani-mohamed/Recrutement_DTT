@@ -917,13 +917,15 @@ else:
 
                 nb_q = len(plan.questions)
                 nb_ancres = sum(1 for q in plan.questions if q.ancrage_verifie)
+                nb_ancres_poste = sum(1 for q in plan.questions if q.ancrage_poste_verifie)
                 nb_criteres = sum(len(q.rubric) for q in plan.questions)
                 nb_relances = sum(len(q.followups) for q in plan.questions)
 
                 st.markdown(
                     f"""<div class="metric-row">
                         <div class="metric-item"><div class="metric-value">{nb_q}</div><div class="metric-label">Questions</div></div>
-                        <div class="metric-item"><div class="metric-value">{nb_ancres}/{nb_q}</div><div class="metric-label">Ancrages vérifiés</div></div>
+                        <div class="metric-item"><div class="metric-value">{nb_ancres}/{nb_q}</div><div class="metric-label">Ancrages CV vérifiés</div></div>
+                        <div class="metric-item"><div class="metric-value">{nb_ancres_poste}/{nb_q}</div><div class="metric-label">Ancrages poste vérifiés</div></div>
                         <div class="metric-item"><div class="metric-value">{nb_criteres}</div><div class="metric-label">Critères</div></div>
                         <div class="metric-item"><div class="metric-value">{nb_relances}</div><div class="metric-label">Relances</div></div>
                     </div>""",
@@ -956,6 +958,11 @@ else:
                         f"ℹ️ {nb_q - nb_ancres} question(s) portent un ancrage introuvable dans le CV "
                         "(badge ⚠️) : à relire avant l'entretien."
                     )
+                if nb_ancres_poste < nb_q:
+                    st.info(
+                        f"ℹ️ {nb_q - nb_ancres_poste} question(s) portent un ancrage introuvable dans la "
+                        "fiche de poste (badge ⚠️) : à relire avant l'entretien."
+                    )
 
                 exigences = plan.brief.job.must_have
                 if exigences:
@@ -979,11 +986,13 @@ else:
                     ):
                         for q in lot:
                             badge = "✅" if q.ancrage_verifie else "⚠️"
+                            badge_poste = "✅" if q.ancrage_poste_verifie else "⚠️"
                             st.markdown(
                                 f"`{q.id}` · **{q.target_competency}** · difficulté {q.difficulty}/5"
                             )
                             st.markdown(f"> {q.question}")
                             st.caption(f"{badge} Ancrage CV : {q.ancrage_cv or '—'}")
+                            st.caption(f"{badge_poste} Ancrage poste : {q.ancrage_poste or '—'}")
 
                             st.markdown("**Barème de notation**")
                             for critere in q.rubric:
@@ -1026,7 +1035,7 @@ if plan_pour_live is None:
     )
 else:
     try:
-        from src.entretien.contracts import InterviewSession
+        from src.entretien.contracts import InterviewSession, QuestionPlan
         from src.entretien.live import (
             demarrer,
             formater_duree,
@@ -1041,6 +1050,18 @@ else:
         st.error(f"Module src.entretien.live introuvable : {e}")
 
     if live_ok:
+        if plan_pour_live is not None and not isinstance(plan_pour_live, QuestionPlan):
+            # Même cause que pour interview_session ci-dessous : plan généré en
+            # mémoire avant un rechargement à chaud du schéma (le module a changé
+            # pendant que le serveur Streamlit tournait). L'ancien objet n'a pas
+            # les champs actuels et fait échouer InterviewSession(plan=...).
+            st.session_state.pop("plan_entretien", None)
+            plan_pour_live = None
+            st.info(
+                "ℹ️ Plan d'entretien incompatible (schéma mis à jour) — "
+                "régénérez-le en section 5."
+            )
+
         session_live = st.session_state.get("interview_session")
         if session_live is not None and not isinstance(session_live, InterviewSession):
             # Session créée en mémoire avant un rechargement à chaud du schéma
@@ -1053,7 +1074,12 @@ else:
         col_live_ctrl, _ = st.columns([1, 2], gap="large")
         with col_live_ctrl:
             libelle_demarrage = "🔄 Recommencer l'entretien" if session_live else "🎙️ Démarrer l'entretien"
-            if st.button(libelle_demarrage, use_container_width=True, key="btn_demarrer_live"):
+            if st.button(
+                libelle_demarrage,
+                use_container_width=True,
+                key="btn_demarrer_live",
+                disabled=plan_pour_live is None,
+            ):
                 session_live = demarrer(plan_pour_live)
                 st.session_state["interview_session"] = session_live
                 st.rerun()

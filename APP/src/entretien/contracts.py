@@ -67,6 +67,8 @@ class Question(BaseModel):
     question: str
     ancrage_cv: str = ""
     ancrage_verifie: bool = False
+    ancrage_poste: str = ""
+    ancrage_poste_verifie: bool = False
     rubric: list[RubricItem] = Field(min_length=2)
     followups: list[str] = Field(default_factory=list)
     reponse_ideale: str = ""
