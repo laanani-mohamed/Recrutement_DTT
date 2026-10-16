@@ -1,0 +1,123 @@
+{
+ "nom_complet": "WISSAL AMMINE",
+ "email": "wissal.ammine@gmail.com",
+ "telephone": "0661605924",
+ "localisation": null,
+ "titre_poste": "Data Scientist spécialisé en NLP & LLM",
+ "competences": [
+  "Python",
+  "R",
+  "Scikit-learn",
+  "Pandas",
+  "NumPy",
+  "TensorFlow",
+  "Keras",
+  "CNN",
+  "YOLO",
+  "ResNet",
+  "LLaMA",
+  "SQL Server",
+  "MySQL",
+  "HTML",
+  "CSS",
+  "JavaScript",
+  "JQuery",
+  "JSON",
+  "PHP",
+  "Bootstrap",
+  "Laravel",
+  "Streamlit",
+  "Flask",
+  "Hadoop",
+  "Power BI",
+  "Tableau",
+  "Matplotlib",
+  "Seaborn"
+ ],
+ "langues": [
+  {
+   "langue": "Arabe",
+   "niveau": "Langue Maternelle"
+  },
+  {
+   "langue": "Français",
+   "niveau": "Courant"
+  },
+  {
+   "langue": "Anglais",
+   "niveau": "Bon niveau"
+  }
+ ],
+ "experience": [
+  {
+   "poste": "AI Engineer (CDI)",
+   "entreprise": "Qalqul Engine",
+   "debut": "2025-09",
+   "fin": null
+  },
+  {
+   "poste": "Stage PFE – ChatBot Docteur Cancer du sein",
+   "entreprise": "Qalqul Engine",
+   "debut": "2025-02",
+   "fin": "2025-06"
+  },
+  {
+   "poste": "Stage – Développement d'un Chatbot IA pour le secteur de l'Assurance",
+   "entreprise": "Qalqul Engine",
+   "debut": "2024-08",
+   "fin": "2025-01"
+  },
+  {
+   "poste": "Stage – OCR pour Texte Manuscrit dans le secteur de l'Assurance",
+   "entreprise": "Qalqul Engine",
+   "debut": "2024-06",
+   "fin": "2024-07"
+  },
+  {
+   "poste": "Stage – Trésorerie Générale du Royaume",
+   "entreprise": "Trésorerie Générale du Royaume",
+   "debut": "2023-07",
+   "fin": "2023-08"
+  },
+  {
+   "poste": "Stage PFE – Conception et Développement d'un Job PDI",
+   "entreprise": "LYDEC",
+   "debut": "2023-04",
+   "fin": "2023-06"
+  },
+  {
+   "poste": "Stage PFE – Développement d'une application Web de gestion de congés",
+   "entreprise": "EL HALLOUI",
+   "debut": "2021-03",
+   "fin": null
+  }
+ ],
+ "formation": [
+  {
+   "diplome": "Master, Data science et Intelligence Artificielle",
+   "etablissement": "Université Mundiapolis",
+   "debut": "2023",
+   "fin": "2025"
+  },
+  {
+   "diplome": "Licence professionnelle, Informatique Appliquée",
+   "etablissement": "Université Mundiapolis",
+   "debut": "2022",
+   "fin": "2023"
+  },
+  {
+   "diplome": "Bac+2, Développement Informatique et Multimédia",
+   "etablissement": "OFPPT, Ouezzane",
+   "debut": "2020",
+   "fin": "2022"
+  },
+  {
+   "diplome": "Baccalauréat, Science Physique",
+   "etablissement": "Lycée Ibn Zohr, Ouezzane",
+   "debut": "2018",
+   "fin": "2019"
+  }
+ ],
+ "certifications": [],
+ "_notes": "Annoté à la main par Claude depuis le texte markitdown (texte sans espaces). À vérifier."
+}

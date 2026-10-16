@@ -45,5 +45,6 @@
   "43": "AppelLLM",
   "44": "Progression",
   "45": "BaseModel",
-  "46": "AppelLLM"
+  "46": "AppelLLM",
+  "47": "extract_with_llmwhisperer"
 }

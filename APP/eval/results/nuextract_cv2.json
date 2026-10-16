@@ -1,0 +1,7 @@
+{
+ "provider": "nuextract",
+ "cv": "cv2",
+ "json_valide": false,
+ "erreur": "llama_decode returned -3",
+ "latence_s": 0.1
+}

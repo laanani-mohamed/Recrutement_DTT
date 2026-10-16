@@ -438,12 +438,10 @@ else:
         col_json_cfg, col_json_res = st.columns([1, 2], gap="large")
 
         with col_json_cfg:
-            provider_labels_map = {
-                k: f"{v['badge']} {v['label']}" for k, v in PROVIDERS.items()
-            }
+            provider_labels_map = {k: v["label"] for k, v in PROVIDERS.items()}
 
             provider_choisi = st.selectbox(
-                "🤖 Provider LLM",
+                "Provider LLM",
                 options=list(PROVIDERS.keys()),
                 format_func=lambda k: provider_labels_map[k],
                 key="provider_json",
@@ -451,26 +449,22 @@ else:
 
             info_prov = PROVIDERS[provider_choisi]
             st.caption(info_prov["description"])
-            if provider_choisi != "ollama":
-                st.markdown(f"🔑 [Clé gratuite]({info_prov['signup_url']})")
 
             st.markdown("<br>", unsafe_allow_html=True)
 
             if provider_choisi == "ollama":
                 api_key_input = st.text_input(
-                    "🦙 Modèle Ollama",
+                    "Modèle Ollama",
                     value="qwen2.5:14b",
                     help="Le nom du modèle Ollama (ex: qwen2.5:14b, llama3.1). Il doit être installé localement (ollama run model_name).",
                     key="api_key_json",
                 )
             else:
-                api_key_input = st.text_input(
-                    f"🗝️ Clé API — {info_prov['env_key']}",
-                    type="password",
-                    placeholder=f"Collez votre {info_prov['env_key']} ici...",
-                    help="Optionnel si la clé est déjà intégrée dans le code.",
-                    key="api_key_json",
-                )
+                api_key_input = None
+
+            if provider_choisi == "nuextract":
+                st.warning("⚠️ Local : 1er lancement = téléchargement (~2,8 Go) + chargement. "
+                           "Fermez les apps lourdes (8 Go de RAM).")
 
             st.markdown("<br>", unsafe_allow_html=True)
 
@@ -497,6 +491,9 @@ else:
                         st.session_state["result_json"] = result_json
 
                         st.success(f"✅ Conversion réussie en {duree_llm:.1f}s")
+                        if provider_choisi == "nuextract":
+                            from src.convert_json.nuextract_provider import LAST_STATS
+                            st.caption(" · ".join(f"{k}: {v}" for k, v in LAST_STATS.items()))
 
                         # Cards résumé
                         nom   = result_json.get("nom_complet", "—")
@@ -568,6 +565,57 @@ else:
             else:
                 empty_state("🔄", "Choisissez un provider LLM et lancez la conversion.")
 
+        # ---- Comparaison NuExtract3 (local) vs API sur le même CV ----
+        with st.expander("⚖️ Comparer NuExtract3 (local) avec les API"):
+            st.caption("Lance les providers choisis, l'un après l'autre, sur le même texte. "
+                       "Les clés API sont lues dans APP/.env. NuExtract3 est local (Metal/CPU).")
+            comp_providers = st.multiselect(
+                "Providers à comparer",
+                options=list(PROVIDERS.keys()),
+                default=[p for p in ("nuextract", "groq") if p in PROVIDERS],
+                format_func=lambda k: provider_labels_map[k],
+                key="comp_providers",
+            )
+            modele_ollama_cmp = None
+            if "ollama" in comp_providers:
+                modele_ollama_cmp = st.text_input("Modèle Ollama", value="qwen2.5:14b", key="comp_ollama")
+
+            if st.button("⚖️ Lancer la comparaison", key="btn_compare", disabled=not comp_providers):
+                resultats = {}
+                for p in comp_providers:
+                    with st.spinner(f"🤖 {PROVIDERS[p]['label']}..."):
+                        t0 = time.perf_counter()
+                        try:
+                            data = convert_cv(texte_dispo, provider=p,
+                                              api_key=modele_ollama_cmp if p == "ollama" else None)
+                            resultats[p] = {"data": data, "duree": time.perf_counter() - t0}
+                        except Exception as e:
+                            resultats[p] = {"erreur": str(e)[:500], "duree": time.perf_counter() - t0}
+                st.session_state["comp_resultats"] = resultats
+
+            resultats = st.session_state.get("comp_resultats")
+            if resultats:
+                st.table([
+                    {
+                        "Provider": PROVIDERS[p]["label"],
+                        "Temps (s)": round(r["duree"], 1),
+                        "Statut": "✅" if "data" in r else "❌",
+                        "Compétences": len(r["data"].get("competences") or []) if "data" in r else "—",
+                        "Expériences": len(r["data"].get("experience") or []) if "data" in r else "—",
+                    }
+                    for p, r in resultats.items()
+                ])
+                tabs = st.tabs([PROVIDERS[p]["label"] for p in resultats])
+                for tab, (p, r) in zip(tabs, resultats.items()):
+                    with tab:
+                        if "data" in r:
+                            st.code(json.dumps(r["data"], ensure_ascii=False, indent=2), language="json")
+                            if st.button("Utiliser ce JSON pour la suite", key=f"use_{p}"):
+                                st.session_state["result_json"] = r["data"]
+                                st.rerun()
+                        else:
+                            st.error(r["erreur"])
+
 
 st.markdown("---")
 
@@ -606,12 +654,10 @@ else:
 
             st.markdown("<br>", unsafe_allow_html=True)
 
-            provider_labels_map = {
-                k: f"{v['badge']} {v['label']}" for k, v in SCORING_PROVIDERS.items()
-            }
+            provider_labels_map = {k: v["label"] for k, v in SCORING_PROVIDERS.items()}
 
             provider_choisi_score = st.selectbox(
-                "🤖 Provider LLM (Scoring)",
+                "Provider LLM (Scoring)",
                 options=list(SCORING_PROVIDERS.keys()),
                 format_func=lambda k: provider_labels_map[k],
                 key="provider_score",
@@ -622,18 +668,13 @@ else:
 
             if provider_choisi_score == "ollama":
                 api_key_score = st.text_input(
-                    "🦙 Modèle Ollama (Scoring)",
+                    "Modèle Ollama (Scoring)",
                     value="qwen2.5:14b",
                     help="Le nom du modèle Ollama (ex: qwen2.5:14b).",
                     key="api_key_score",
                 )
             else:
-                api_key_score = st.text_input(
-                    f"🗝️ Clé API — {info_prov_score['env_key']}",
-                    type="password",
-                    placeholder=f"Collez votre {info_prov_score['env_key']} ici...",
-                    key="api_key_score",
-                )
+                api_key_score = None
 
             st.markdown("<br>", unsafe_allow_html=True)
 
@@ -796,12 +837,10 @@ else:
         col_ent_cfg, col_ent_res = st.columns([1, 2], gap="large")
 
         with col_ent_cfg:
-            provider_labels_ent = {
-                k: f"{v['badge']} {v['label']}" for k, v in ENTRETIEN_PROVIDERS.items()
-            }
+            provider_labels_ent = {k: v["label"] for k, v in ENTRETIEN_PROVIDERS.items()}
 
             provider_entretien = st.selectbox(
-                "🤖 Provider LLM (Entretien)",
+                "Provider LLM (Entretien)",
                 options=list(ENTRETIEN_PROVIDERS.keys()),
                 format_func=lambda k: provider_labels_ent[k],
                 key="provider_entretien",
@@ -812,22 +851,13 @@ else:
 
             if provider_entretien == "ollama":
                 cle_entretien = st.text_input(
-                    "🦙 Modèle Ollama (Entretien)",
+                    "Modèle Ollama (Entretien)",
                     value="qwen2.5:14b",
                     help="Le plan d'entretien est exigeant : préférez un modèle ≥ 14B.",
                     key="api_key_entretien",
                 )
             else:
-                cle_entretien = st.text_input(
-                    f"🗝️ Clé API — {info_ent['env_key']}",
-                    type="password",
-                    placeholder=f"Collez votre {info_ent['env_key']} ici...",
-                    help=(
-                        "Obligatoire : ce module n'embarque aucune clé par défaut, "
-                        "contrairement aux sections 3 et 4."
-                    ),
-                    key="api_key_entretien",
-                )
+                cle_entretien = None
 
             job_desc_entretien = (st.session_state.get("job_desc_input") or "").strip()
             carte_score_entretien = st.session_state.get("result_score", None)
@@ -1182,11 +1212,9 @@ else:
         col_eval_cfg, col_eval_res = st.columns([1, 2], gap="large")
 
         with col_eval_cfg:
-            provider_labels_eval = {
-                k: f"{v['badge']} {v['label']}" for k, v in EVAL_PROVIDERS.items()
-            }
+            provider_labels_eval = {k: v["label"] for k, v in EVAL_PROVIDERS.items()}
             provider_choisi_eval = st.selectbox(
-                "🤖 Provider LLM (Analyse)",
+                "Provider LLM (Analyse)",
                 options=list(EVAL_PROVIDERS.keys()),
                 format_func=lambda k: provider_labels_eval[k],
                 key="provider_eval",
@@ -1196,17 +1224,12 @@ else:
 
             if provider_choisi_eval == "ollama":
                 api_key_eval = st.text_input(
-                    "🦙 Modèle Ollama (Analyse)",
+                    "Modèle Ollama (Analyse)",
                     value="qwen2.5:14b",
                     key="api_key_eval",
                 )
             else:
-                api_key_eval = st.text_input(
-                    f"🗝️ Clé API — {info_prov_eval['env_key']}",
-                    type="password",
-                    placeholder=f"Collez votre {info_prov_eval['env_key']} ici...",
-                    key="api_key_eval",
-                )
+                api_key_eval = None
 
             st.markdown("<br>", unsafe_allow_html=True)
             lancer_eval = st.button(

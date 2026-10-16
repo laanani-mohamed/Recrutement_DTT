@@ -1,16 +1,16 @@
-# Graph Report - 2-Recrutement  (2026-09-22)
+# Graph Report - 2-Recrutement  (2026-10-16)
 
 ## Corpus Check
-- 51 files · ~66,123 words
+- 58 files · ~68,651 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 352 nodes · 408 edges · 47 communities (31 shown, 16 thin omitted)
-- Extraction: 85% EXTRACTED · 15% INFERRED · 0% AMBIGUOUS · INFERRED: 62 edges (avg confidence: 0.8)
+- 377 nodes · 451 edges · 48 communities (32 shown, 16 thin omitted)
+- Extraction: 86% EXTRACTED · 14% INFERRED · 0% AMBIGUOUS · INFERRED: 65 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `7eacfb8d`
+- Built from commit: `cb02d620`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -58,18 +58,19 @@
 - Progression
 - BaseModel
 - AppelLLM
+- extract_with_llmwhisperer
 
 ## God Nodes (most connected - your core abstractions)
 1. `🌿 GreenHire AI — Architecture Technique Complète` - 20 edges
 2. `run()` - 13 edges
 3. `CleApiManquante` - 12 edges
-4. `_evaluer_question()` - 10 edges
-5. `run()` - 10 edges
-6. `parse_json_block()` - 10 edges
-7. `run()` - 9 edges
-8. `convert_cv()` - 8 edges
-9. `Question` - 8 edges
-10. `_generer_section()` - 8 edges
+4. `eval_cv()` - 10 edges
+5. `convert_cv()` - 10 edges
+6. `_evaluer_question()` - 10 edges
+7. `run()` - 10 edges
+8. `parse_json_block()` - 10 edges
+9. `run()` - 9 edges
+10. `Question` - 8 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `soumettre_reponse()` --calls--> `AnswerRecord`  [INFERRED]
@@ -86,7 +87,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (47 total, 16 thin omitted)
+## Communities (48 total, 16 thin omitted)
 
 ### Community 0 - "pipeline.py"
 Cohesion: 0.08
@@ -94,11 +95,11 @@ Nodes (34): AnswerRecord, EvaluatedAnswer, InterviewBrief, InterviewEvaluation, 
 
 ### Community 1 - "main_extraction.py"
 Cohesion: 0.11
-Nodes (15): ExtractionMethod, extract_with_llmwhisperer(), _ocr_page(), llmwhisperer_ocr.py ==================== Méthode d'extraction : LLMWhisperer (AP, Extrait le texte d'une page spécifique d'un PDF via LLMWhisperer.      Args:, Extrait le texte complet d'un PDF via LLMWhisperer, page par page.      Le résul, extract_text(), main_extraction.py =================== Module principal d'orchestration de l'ext (+7 more)
+Nodes (24): afficher(), apparier(), compact(), _dict_items(), eval_cv(), _liste(), main(), norm() (+16 more)
 
 ### Community 2 - "parse_json_block"
-Cohesion: 0.08
-Nodes (22): ProviderName, classify_with_gemini(), gemini_provider.py =================== Provider LLM : Google Gemini Flash 2.0 --, Analyse un texte de CV via l'API Google Gemini et retourne un dict JSON structur, classify_with_groq(), groq_provider.py ================= Provider LLM : Groq (llama-3.3-70b-versatile), Analyse un texte de CV via l'API Groq et retourne un dict JSON structuré.      A, convert_cv() (+14 more)
+Cohesion: 0.07
+Nodes (28): classify_with_gemini(), gemini_provider.py =================== Provider LLM : Google Gemini Flash 2.0 --, Analyse un texte de CV via l'API Google Gemini et retourne un dict JSON structur, classify_with_groq(), groq_provider.py ================= Provider LLM : Groq (llama-3.3-70b-versatile), Analyse un texte de CV via l'API Groq et retourne un dict JSON structuré.      A, convert_cv(), main_convert_json.py ==================== Module principal d'orchestration des p (+20 more)
 
 ### Community 3 - "pipeline.py"
 Cohesion: 0.05
@@ -109,8 +110,8 @@ Cohesion: 0.09
 Nodes (23): Contrats de données pour le scoring CV / fiche de poste.  Principe directeur : l, Verdict du LLM sur UNE exigence du poste, jamais un score global., Évaluation complète d'un CV face à un poste, exigence par exigence., Score 0-100, pondéré must_have > nice_to_have. Calcul Python pur., RequirementVerdict, ScoreCard, main_scoring.py ================ Module principal d'orchestration des providers, Évalue un CV (JSON) face à une fiche de poste, exigence par exigence.      Args: (+15 more)
 
 ### Community 5 - "pipeline.py"
-Cohesion: 0.11
-Nodes (24): CriterionVerdict, Verdict du LLM sur UN critère du barème d'une question, jamais un score., _avancer(), _completer_criteres_manquants(), _evaluer_avec_isolation(), _evaluer_question(), _maintenant(), _parser_criteres() (+16 more)
+Cohesion: 0.09
+Nodes (27): CriterionVerdict, Verdict du LLM sur UN critère du barème d'une question, jamais un score., evaluate_interview(), main_evaluation.py =================== Module principal d'orchestration des prov, Note chaque réponse enregistrée dans la session contre le barème de sa question., _avancer(), _completer_criteres_manquants(), _evaluer_avec_isolation() (+19 more)
 
 ### Community 6 - "CleApiManquante"
 Cohesion: 0.15
@@ -196,6 +197,10 @@ Nodes (4): Canaux, Module 10 — Notification Service, Objectif, Verdict
 Cohesion: 0.50
 Nodes (4): Ce que personne ne fait (votre territoire), Ce qui existe déjà (saturé), Différenciation Concurrentielle, Pitch final ajusté
 
+### Community 47 - "extract_with_llmwhisperer"
+Cohesion: 0.40
+Nodes (5): extract_with_llmwhisperer(), _ocr_page(), llmwhisperer_ocr.py ==================== Méthode d'extraction : LLMWhisperer (AP, Extrait le texte d'une page spécifique d'un PDF via LLMWhisperer.      Args:, Extrait le texte complet d'un PDF via LLMWhisperer, page par page.      Le résul
+
 ## Knowledge Gaps
 - **60 isolated node(s):** `📋 Table des Matières`, `1. Vision du Projet`, `2. Stack Technique Global`, `3. Architecture en 5 Couches`, `Objectif` (+55 more)
   These have ≤1 connection - possible missing edges or undocumented components.
@@ -205,16 +210,16 @@ Nodes (4): Ce que personne ne fait (votre territoire), Ce qui existe déjà (sat
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `CleApiManquante` connect `pipeline.py` to `parse_json_block`?**
-  _High betweenness centrality (0.129) - this node is a cross-community bridge._
-- **Why does `run()` connect `main_scoring.py` to `debug.py`, `__init__.py`?**
-  _High betweenness centrality (0.072) - this node is a cross-community bridge._
-- **Why does `_parser_questions()` connect `pipeline.py` to `debug.py`, `parse_json_block`?**
-  _High betweenness centrality (0.067) - this node is a cross-community bridge._
-- **Are the 13 inferred relationships involving `ValueError` (e.g. with `_parser_questions()` and `classify_with_gemini()`) actually correct?**
+  _High betweenness centrality (0.126) - this node is a cross-community bridge._
+- **Why does `extract_text()` connect `main_extraction.py` to `parse_json_block`, `extract_with_llmwhisperer`?**
+  _High betweenness centrality (0.081) - this node is a cross-community bridge._
+- **Why does `convert_cv()` connect `parse_json_block` to `main_extraction.py`?**
+  _High betweenness centrality (0.080) - this node is a cross-community bridge._
+- **Are the 13 inferred relationships involving `ValueError` (e.g. with `classify_with_gemini()` and `classify_with_groq()`) actually correct?**
   _`ValueError` has 13 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 7 inferred relationships involving `run()` (e.g. with `score_cv()` and `system_verdict()`) actually correct?**
   _`run()` has 7 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 9 inferred relationships involving `CleApiManquante` (e.g. with `call_llm()` and `call_llm()`) actually correct?**
   _`CleApiManquante` has 9 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 5 inferred relationships involving `_evaluer_question()` (e.g. with `criteres_avec_id()` and `system_evaluation_question()`) actually correct?**
-  _`_evaluer_question()` has 5 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `run_eval.py — précision / métriques d'un provider de conversion CV -> JSON.  Usa`, `05/2026' | '2026-05' | '2026' -> 'YYYY-MM' / 'YYYY' ; présent/vide -> None.`, `Appariement glouton 1-1 : renvoie [(i_gold, j_pred, score)].` to the rest of the system?**
+  _182 weakly-connected nodes found - possible documentation gaps or missing edges._

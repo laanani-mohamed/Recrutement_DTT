@@ -1,0 +1,105 @@
+{
+ "nom_complet": "Mohamed LAANANI",
+ "email": "laanani.med13@gmail.com",
+ "telephone": "+212 634186244",
+ "localisation": "Casablanca, Maroc",
+ "titre_poste": "Data Scientist",
+ "competences": [
+  "Python",
+  "R",
+  "SQL",
+  "MySQL",
+  "PostgreSQL",
+  "MongoDB",
+  "Power BI",
+  "Tableau",
+  "Grafana",
+  "Seaborn",
+  "Matplotlib",
+  "Plotly",
+  "Flask",
+  "FastAPI",
+  "Streamlit",
+  "Scikit-learn",
+  "TensorFlow",
+  "NLP",
+  "PyTorch",
+  "Computer Vision",
+  "Time Series Forecasting",
+  "Apache NiFi",
+  "Kafka",
+  "Docker"
+ ],
+ "langues": [
+  {
+   "langue": "Arabe",
+   "niveau": "Native"
+  },
+  {
+   "langue": "Français",
+   "niveau": "Fluent"
+  },
+  {
+   "langue": "Anglais",
+   "niveau": "Fluent"
+  }
+ ],
+ "experience": [
+  {
+   "poste": "Data Scientist",
+   "entreprise": "DATATEAM",
+   "debut": "2026-05",
+   "fin": null
+  },
+  {
+   "poste": "Stagiaire – Data Scientist – Assurance & Actuariat",
+   "entreprise": "La Marocaine Vie Assurance",
+   "debut": "2025-06",
+   "fin": "2025-11"
+  },
+  {
+   "poste": "Stagiaire – AI Engineer",
+   "entreprise": "DATALINK",
+   "debut": "2025-02",
+   "fin": "2025-06"
+  },
+  {
+   "poste": "Stagiaire - Data Scientist",
+   "entreprise": "La Marocaine Vie Assurance",
+   "debut": "2024-07",
+   "fin": "2024-09"
+  },
+  {
+   "poste": "Stagiaire - Data Analyst",
+   "entreprise": "DATATEAM",
+   "debut": "2023-03",
+   "fin": "2023-07"
+  }
+ ],
+ "formation": [
+  {
+   "diplome": "Master en Science des données et Intelligence Artificielle",
+   "etablissement": "Université Mundiapolis",
+   "debut": "2023-09",
+   "fin": "2025-08"
+  },
+  {
+   "diplome": "Licence professionnelle en modélisation statistique et informatique",
+   "etablissement": "Faculté des sciences Aïn-Chock",
+   "debut": "2021-09",
+   "fin": "2023-07"
+  },
+  {
+   "diplome": "Baccalauréat option française en physique",
+   "etablissement": "L'Ambassadeur",
+   "debut": "2018-09",
+   "fin": "2019-07"
+  }
+ ],
+ "certifications": [
+  "Google Advanced Data Analytics",
+  "Tableau Business Intelligence Analyst",
+  "IBM AI Developper & Engineering"
+ ],
+ "_notes": "Annoté à la main par Claude depuis le texte markitdown. Dates reliées aux postes par ordre de lecture (mise en page 2 colonnes) : à vérifier. Prix/hackathons exclus des certifications."
+}

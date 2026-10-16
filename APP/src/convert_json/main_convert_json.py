@@ -27,6 +27,7 @@ from src.convert_json.groq_provider       import classify_with_groq
 from src.convert_json.gemini_provider     import classify_with_gemini
 from src.convert_json.openrouter_provider import classify_with_openrouter
 from src.convert_json.ollama_provider     import classify_with_ollama
+from src.convert_json.nuextract_provider  import classify_with_nuextract
 
 
 # ------------------------------------------------------------------
@@ -53,6 +54,13 @@ PROVIDERS: dict[str, dict] = {
         "env_key":     "OLLAMA_MODEL",
         "signup_url":  "https://ollama.com",
         "badge":       "🦙",
+    },
+    "nuextract": {
+        "label":       "NuExtract3 (Local Metal/CPU)",
+        "description": "Extraction JSON locale (100% privé) — GGUF Q4 ~2,8 Go, Metal avec repli CPU",
+        "env_key":     "NUEXTRACT_FILE",
+        "signup_url":  "https://huggingface.co/numind/NuExtract3-GGUF",
+        "badge":       "🧬",
     },
     "openrouter": {
         "label":       "OpenRouter (multi-modèles)",
@@ -119,6 +127,8 @@ def convert_cv(cv_text: str, provider: ProviderName = "groq", api_key: str = Non
         return classify_with_openrouter(cv_text, api_key=api_key)
     elif provider == "ollama":
         return classify_with_ollama(cv_text, model=api_key)
+    elif provider == "nuextract":
+        return classify_with_nuextract(cv_text)
 
 
 # Alias pour compatibilité
